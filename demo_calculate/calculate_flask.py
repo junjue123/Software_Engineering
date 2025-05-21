@@ -45,10 +45,6 @@ def port_detection():
         except Exception as e:
             return jsonify({'error': f'计算过程发生错误: {str(e)}'}), 500  # 可能是服务器问题
 
-    except ZeroDivisionError:
-        return jsonify({'error': '除数不能为零'}), 400
-    except ValueError as ve:
-        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': f'内部错误: {str(e)}'}), 500
 
