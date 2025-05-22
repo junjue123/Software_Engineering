@@ -1,17 +1,17 @@
+from calculate import calculate
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # 导入 CORS 扩展
 
 app = Flask(__name__)
-
-from calculate import calculate
+CORS(app)  # 启用 CORS 支持，允许所有域名跨域访问
 
 @app.route('/calculate', methods=['POST', 'GET'])
-def port_detection():
+def calculate_route():
+    # 定义初始值
+    num1 = None
+    num2 = None
+    flag = None
     try:
-        # 定义初始值
-        num1 = None
-        num2 = None
-        flag = None
-
         if request.method == 'GET':
             if 'flag' in request.args:
                 flag = int(request.args['flag'])
