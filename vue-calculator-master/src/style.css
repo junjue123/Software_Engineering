@@ -11,14 +11,18 @@ body {
   --button-height: 80px;
   
   display: grid;
-  grid-template-areas: "result result result result"
-    "ac plus-minus percent divide"
-    "number-7 number-8 number-9 multiply"
-    "number-4 number-5 number-6 subtract"
-    "number-1 number-2 number-3 add"
-    "number-0 number-0 dot equal";
+  grid-template-areas: "history history history history"
+                       "result result result result"
+                       "ac plus-minus percent divide"
+                       "number-7 number-8 number-9 multiply"
+                       "number-4 number-5 number-6 subtract"
+                       "number-1 number-2 number-3 add"
+                       "number-0 number-0 dot equal";
   grid-template-columns: repeat(4, var(--button-width));
-  grid-template-rows: repeat(6, var(--button-height));
+  grid-template-rows: 
+  50px /* 单独设置 history 行高度 */
+  var(--button-height) /* result 行保持原高度 */
+  repeat(5, var(--button-height)); /* 剩余5行保持原高度 */
   
   box-shadow: -8px -8px 16px -10px rgba(255, 255, 255, 1), 8px 8px 16px -10px rgba(0, 0, 0, .15);
   padding: 24px;
@@ -51,4 +55,13 @@ body {
   font-family: Helvetica;
   padding: 0 20px;
   color: #666;
+}
+
+.history {
+  text-align: right;
+  line-height: var(--button-height);
+  font-size: 12px;
+  font-family: Helvetica;
+  padding: 0 20px;
+  color: #999;
 }

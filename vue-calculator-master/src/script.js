@@ -45,28 +45,28 @@ new Vue({
     isDecimalAdded: false,
     isOperatorAdded: false,
     isStarted: false,
+    history: '', // 用于存储历史记录
+    lastCalculation: '', // 存储上一次完整的计算式
+    lastResult: '' // 存储上一次的结果
   },
   methods: {
-    // 测试，发送请求
     async send() {
       console.log(this.equation)
-      // 将数据以加号分割，分割成为num1和num2
       const num1 = this.equation.split('+')[0]
       const num2 = this.equation.split('+')[1]
       const response = await sendEquation({ 
         flag: 0,
         num1: num1,
         num2: num2,
-       })
+      })
       console.log(response)
     },
-    // Check if the character is + / - / × / ÷
+    
     isOperator(character) {
       return ['+', '-', '×', '÷'].indexOf(character) > -1
     },
-    // When pressed Operators or Numbers
+    
     append(character) {
-      // Start
       if (this.equation === '0' && !this.isOperator(character)) {
         if (character === '.') {
           this.equation += '' + character
@@ -79,7 +79,6 @@ new Vue({
         return
       }
       
-      // If Number
       if (!this.isOperator(character)) {
         if (character === '.' && this.isDecimalAdded) {
           return
@@ -95,22 +94,40 @@ new Vue({
         this.equation += '' + character
       }
       
-      // Added Operator
       if (this.isOperator(character) && !this.isOperatorAdded) {
         this.equation += '' + character
         this.isDecimalAdded = false
         this.isOperatorAdded = true
       }
     },
-    // When pressed '='
+    
     calculate() {
+      // 保存当前计算式
+      this.lastCalculation = this.equation
+      
       let result = this.equation.replace(new RegExp('×', 'g'), '*').replace(new RegExp('÷', 'g'), '/')
       
-      this.equation = parseFloat(eval(result).toFixed(9)).toString()
-      this.isDecimalAdded = false
-      this.isOperatorAdded = false
+      try {
+        this.lastResult = parseFloat(eval(result).toFixed(9)).toString()
+        this.equation = this.lastResult
+        this.isDecimalAdded = false
+        this.isOperatorAdded = false
+        
+        // 更新历史记录
+        this.updateHistory()
+      } catch (error) {
+        console.error('计算错误:', error)
+        this.equation = 'Error'
+      }
     },
-    // When pressed '+/-'
+    
+    // 更新历史记录
+    updateHistory() {
+      if (this.lastCalculation && this.lastResult) {
+        this.history = `${this.lastCalculation} = ${this.lastResult}`
+      }
+    },
+    
     calculateToggle() {
       if (this.isOperatorAdded || !this.isStarted) {
         return
@@ -119,7 +136,7 @@ new Vue({
       this.equation = this.equation + '* -1'
       this.calculate()
     },
-    // When pressed '%'
+    
     calculatePercentage() {
       if (this.isOperatorAdded || !this.isStarted) {
         return
@@ -128,12 +145,14 @@ new Vue({
       this.equation = this.equation + '* 0.01'
       this.calculate()
     },
-    // When pressed 'AC'
+    
     clear() {
       this.equation = '0'
       this.isDecimalAdded = false
       this.isOperatorAdded = false
       this.isStarted = false
+      // 可以选择是否在清除时也清空历史
+      // this.history = ''
     }
   }
 })

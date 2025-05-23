@@ -9,6 +9,9 @@
 <body>
 <div id="app">
   <div class="calculator">
+    <div class="history" style="grid-area: history">
+      {{ history}}
+    </div>
     <div class="result" style="grid-area: result">
       {{ equation }}
     </div>
@@ -20,7 +23,7 @@
     <button style="grid-area: subtract" @click="append('-')">-</button>
     <button style="grid-area: multiply" @click="append('×')">×</button>
     <button style="grid-area: divide" @click="append('÷')">÷</button>
-    <button style="grid-area: equal" @click="send">=</button>
+    <button style="grid-area: equal" @click="calculate">=</button>
 
     <button style="grid-area: number-1" @click="append(1)">1</button>
     <button style="grid-area: number-2" @click="append(2)">2</button>
