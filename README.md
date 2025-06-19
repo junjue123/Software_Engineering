@@ -107,10 +107,11 @@ Software_Engineering/
 │  ├─ routes/              # API路由
 │  ├─ middleware/          # 中间件（校验逻辑）
 │  └─ package.json          # 依赖配置
-├─ calculator_engine/      # 计算核心模块（Python）
-│  ├─ utils/               # 表达式解析工具
-│  └─ app.py               # Flask服务入口
-└─ docs/                   # 文档目录（含本README）
+├─ python_calculate/      # 计算核心模块（Python）
+│  ├─ calculate.py               # 计算函数
+│  ├─ calculate_flask.py               # Flask服务入口
+│  └─ calculate_demo.py               # 调用示例
+└─ README                 
 ```
 
 
