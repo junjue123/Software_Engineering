@@ -14,11 +14,13 @@
   - 禁止连续输入多个运算符（如"1++2"）；
   - 限制非法字符输入（仅允许数字、运算符及小数点）；
   - 避免以运算符开头（如"+123"）。
-
-### 2. 后端功能
+### 2. 校验功能
 - **校验层**：
   - 验证计算式合法性（如括号匹配、除数为零、无效表达式等）；
   - 过滤非法格式（如多余运算符、非数字字符混入）。
+  - 向后端传递合法计算式
+
+### 3. 后端功能
 - **计算层**：
   - 解析合法计算式，调用数学引擎完成计算；
   - 返回计算结果或错误信息至前端。
@@ -27,6 +29,7 @@
 ## 三、技术架构
 ### 1. 技术栈
 - **前端**：HTML/CSS/JavaScript（基于Vue2框架）
+- **校验层**：C++（校验连接模块）
 - **后端**：Python（计算逻辑模块）
 - **通信协议**：HTTP接口（JSON格式数据传输）
 
@@ -60,9 +63,14 @@ cd Software_Engineering/vue-calculator-master
 npm run serve
 ```
 
-#### （2）后端服务启动
+#### （2）校验层启动
 ```bash
-
+# 进入校验层目录
+cd validator_service
+# 安装依赖
+npm install
+# 启动服务
+npm start
 ```
 
 #### （3）计算模块运行（Python）
@@ -73,27 +81,98 @@ cd calculator_engine
 python app.py
 ```
 
+#### （4）C++中间件部署
+```bash
+# 进入C++中间件目录
+cd calculator-middleware-cpp
+# 创建构建目录
+mkdir build && cd build
+# 配置CMake
+cmake ..
+# 编译
+cmake --build .
+# 运行服务
+./calculator_middleware
+```
+
+
+
+// ... existing code ...
 
 ## 五、接口文档
+
 ### 1. 校验与计算接口
 - **URL**：`/api/calculate`
 - **方法**：POST
+- **请求参数**：  
+```json  
+{  
+  "expression": "1+2×3"  // 需转义为"1+2*3"  
+}  
+```
+- **响应格式**：  
+```json  
+{  
+  "status": "success/error",  
+  "data": {  
+    "result": "7",       // 计算结果（仅status为success时存在）  
+    "error": "非法表达式" // 错误信息（仅status为error时存在）  
+  }  
+}  
+```
+
+### 2. 中间层校验接口
+- **URL**：`http://localhost:8080/validate`
+- **方法**：POST
 - **请求参数**：
-  ```json
-  {
-    "expression": "1+2×3"  // 需转义为"1+2*3"
-  }
-  ```
+```json
+{
+  "expression": "1+2×3",  // 需转义为"1+2*3"
+  "validateType": "all"    // 可选值：all/syntax/math，默认为all
+}
+```
 - **响应格式**：
-  ```json
-  {
-    "status": "success/error",
-    "data": {
-      "result": "7",       // 计算结果（仅status为success时存在）
-      "error": "非法表达式" // 错误信息（仅status为error时存在）
-    }
+```json
+{
+  "status": "success/error",
+  "data": {
+    "isValid": true,           // 表达式是否合法
+    "errorType": null,         // 错误类型（仅当isValid为false时存在）
+    "errorMessage": null,      // 错误详细信息（仅当isValid为false时存在）
+    "normalizedExpression": "1+2*3"  // 规范化后的表达式（仅当isValid为true时存在）
   }
-  ```
+}
+```
+- **错误类型说明**：
+  - `SYNTAX_ERROR`: 语法错误（如括号不匹配）
+  - `MATH_ERROR`: 数学错误（如除数为零）
+  - `INPUT_ERROR`: 输入错误（如非法字符）
+
+### 3. 后端计算接口
+- **URL**：`http://localhost:8080/calculate`
+- **方法**：POST
+- **请求参数**：
+```json
+{
+  "expression": "1+2*3",
+  "precision": 2  // 可选，指定结果精度，默认为2
+}
+```
+- **响应格式**：
+```json
+{
+  "status": "success/error",
+  "data": {
+    "result": "7.00",    // 计算结果（仅status为success时存在）
+    "error": "Invalid expression" // 错误信息（仅status为error时存在）
+  }
+}
+```
+- **错误码说明**：
+  - 200: 计算成功
+  - 400: 请求参数错误
+  - 500: 服务器内部错误
+
 
 
 ## 六、项目结构
@@ -107,11 +186,15 @@ Software_Engineering/
 │  ├─ routes/              # API路由
 │  ├─ middleware/          # 中间件（校验逻辑）
 │  └─ package.json          # 依赖配置
-├─ python_calculate/      # 计算核心模块（Python）
-│  ├─ calculate.py               # 计算函数
-│  ├─ calculate_flask.py               # Flask服务入口
-│  └─ calculate_demo.py               # 调用示例
-└─ README                 
+├─ calculator_engine/      # 计算核心模块（Python）
+│  ├─ utils/               # 表达式解析工具
+│  └─ app.py               # Flask服务入口
+├─ calculator-middleware-cpp/  # C++计算中间件
+│  ├─ src/                 # 源代码文件
+│  ├─ include/             # 头文件
+│  ├─ build/               # 构建目录
+│  └─ CMakeLists.txt       # CMake构建配置
+└─ docs/                   # 文档目录（含本README）
 ```
 
 
@@ -128,7 +211,16 @@ Software_Engineering/
 
 
 ## 九、版本说明
-- **当前版本**：V1.0.0（2025-05-28）
+- **当前版本**：V1.0.1（2025-05-29）
+- 版本更新： 
+- V1.0.1（2025-06-05） 
+  - 新增 C++ 高性能校验中间件  
+  - 优化校验性能
+  - 完善错误处理机制   
+- V1.0.0（2025-05-28） 
+ - 基础计算功能实现
+ - 前端界面开发完成 
+ - Python 后端服务部署
 - **待优化功能**：
   - 支持更多运算符（如平方、开根号）；
   - 历史记录存储功能；
