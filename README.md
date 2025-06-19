@@ -132,3 +132,6 @@ Software_Engineering/
   - 支持更多运算符（如平方、开根号）；
   - 历史记录存储功能；
   - 响应式布局适配移动端。
+
+## 十、运行视频
+链接: https://pan.baidu.com/s/1bh_I37z899DLkhJsD4UPnQ?pwd=s9et 提取码: s9et
